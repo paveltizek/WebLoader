@@ -310,13 +310,13 @@ class Compiler
 	 */
 	protected function loadFile($file)
 	{
-		$content = file_get_contents($file);
-
-		foreach ($this->fileFilters as $filter) {
+		if (file_exists($file)) {
+		    $content = file_get_contents($file);
+		    foreach ($this->fileFilters as $filter) {
 			$content = call_user_func($filter, $content, $this, $file);
-		}
-
-		return $content;
+		    }
+            return $content;
+        }
 	}
 
 	/**
