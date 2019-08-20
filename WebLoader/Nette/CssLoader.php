@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace WebLoader\Nette;
 
 use Nette\Utils\Html;
@@ -10,7 +12,7 @@ use Nette\Utils\Html;
  * @author Jan Marek
  * @license MIT
  */
-class CssLoader extends WebLoader
+class CssLoader extends \WebLoader\Nette\WebLoader
 {
 
 	/** @var string */
@@ -23,94 +25,62 @@ class CssLoader extends WebLoader
 	private $type = 'text/css';
 
 	/** @var bool */
-	private $alternate = FALSE;
+	private $alternate = false;
 
-	/**
-	 * Get media
-	 * @return string
-	 */
-	public function getMedia()
+
+	public function getMedia(): string
 	{
 		return $this->media;
 	}
 
-	/**
-	 * Get type
-	 * @return string
-	 */
-	public function getType()
+
+	public function getType(): string
 	{
 		return $this->type;
 	}
 
-	/**
-	 * Get title
-	 * @return string
-	 */
-	public function getTitle()
+
+	public function getTitle(): string
 	{
 		return $this->title;
 	}
 
-	/**
-	 * Is alternate ?
-	 * @return bool
-	 */
-	public function isAlternate()
+
+	public function isAlternate(): bool
 	{
 		return $this->alternate;
 	}
 
-	/**
-	 * Set media
-	 * @param string $media
-	 * @return CssLoader
-	 */
-	public function setMedia($media)
+
+	public function setMedia(string $media): self
 	{
 		$this->media = $media;
 		return $this;
 	}
 
-	/**
-	 * Set type
-	 * @param string $type
-	 * @return CssLoader
-	 */
-	public function setType($type)
+
+	public function setType(string $type): self
 	{
 		$this->type = $type;
 		return $this;
 	}
 
-	/**
-	 * Set title
-	 * @param string $title
-	 * @return CssLoader
-	 */
-	public function setTitle($title)
+
+	public function setTitle(string $title): self
 	{
 		$this->title = $title;
 		return $this;
 	}
 
-	/**
-	 * Set alternate
-	 * @param bool $alternate
-	 * @return CssLoader
-	 */
-	public function setAlternate($alternate)
+
+	public function setAlternate(bool $alternate): self
 	{
 		$this->alternate = $alternate;
 		return $this;
 	}
 
-	/**
-	 * Get link element
-	 * @param string $source
-	 * @return Html
-	 */
-	public function getElement($source)
+
+	public function getElement(string $source): Html
 	{
 		if ($this->alternate) {
 			$alternate = ' alternate';
@@ -118,7 +88,6 @@ class CssLoader extends WebLoader
 			$alternate = '';
 		}
 
-		return Html::el("link")->rel("stylesheet".$alternate)->type($this->type)->media($this->media)->title($this->title)->href($source);
+		return Html::el('link')->rel('stylesheet' . $alternate)->type($this->type)->media($this->media)->title($this->title)->href($source);
 	}
-
 }

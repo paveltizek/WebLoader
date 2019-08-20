@@ -1,13 +1,15 @@
 <?php
+declare(strict_types=1);
 
 namespace WebLoader\Test\Filter;
 
+use PHPUnit\Framework\TestCase;
 use WebLoader\Compiler;
 use WebLoader\DefaultOutputNamingConvention;
 use WebLoader\FileCollection;
 use WebLoader\Filter\LessFilter;
 
-class LessFilterTest extends \PHPUnit_Framework_TestCase
+class LessFilterTest extends TestCase
 {
 	/** @var LessFilter */
 	private $filter;
@@ -15,7 +17,8 @@ class LessFilterTest extends \PHPUnit_Framework_TestCase
 	/** @var Compiler */
 	private $compiler;
 
-	protected function setUp()
+
+	protected function setUp(): void
 	{
 		$this->filter = new LessFilter(new \lessc());
 
@@ -24,11 +27,11 @@ class LessFilterTest extends \PHPUnit_Framework_TestCase
 		$this->compiler = new Compiler($files, new DefaultOutputNamingConvention(), $outputDir);
 	}
 
-	public function testReplace()
+
+	public function testReplace(): void
 	{
 		$file = __DIR__ . '/../fixtures/style.less';
 		$less = $this->filter->__invoke(file_get_contents($file), $this->compiler, $file);
 		$this->assertSame(file_get_contents(__DIR__ . '/../fixtures/style.less.expected'), $less);
 	}
-
 }

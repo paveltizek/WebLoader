@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace WebLoader;
 
 /**
@@ -9,7 +11,5 @@ namespace WebLoader;
  */
 interface IOutputNamingConvention
 {
-
-	public function getFilename(array $files, Compiler $compiler);
-
+	public function getFilename(array $files, Compiler $compiler): string;
 }

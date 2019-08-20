@@ -1,7 +1,9 @@
 <?php
+declare(strict_types=1);
 
 namespace WebLoader\Test\Filter;
 
+use PHPUnit\Framework\TestCase;
 use WebLoader\Filter\PHPCoffeeScriptFilter;
 
 /**
@@ -9,25 +11,27 @@ use WebLoader\Filter\PHPCoffeeScriptFilter;
  *
  * @author Jan Svantner
  */
-class PHPCoffeeScriptFilterTest extends \PHPUnit_Framework_TestCase
+class PHPCoffeeScriptFilterTest extends TestCase
 {
 
 	/** @var PHPCoffeeScriptFilter */
 	private $object;
 
-	protected function setUp()
+
+	protected function setUp(): void
 	{
 		$this->object = new PHPCoffeeScriptFilter();
 	}
 
-	public function testSimpleLoadAndParse()
+
+	public function testSimpleLoadAndParse(): void
 	{
 		if (!class_exists('CoffeeScript\Compiler')) {
 			$this->markTestSkipped('Missing CoffeeScript compiler.');
 		}
 
 		$compiler = new PHPCoffeeScriptFilter();
-		$coffee = $compiler->compileCoffee("number = -42 if opposite", null);
+		$coffee = $compiler->compileCoffee('number = -42 if opposite', null);
 
 		$version = COFFEESCRIPT_VERSION;
 		$expected = <<<COFFEE

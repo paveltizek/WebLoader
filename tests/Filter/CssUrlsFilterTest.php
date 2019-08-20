@@ -1,27 +1,32 @@
 <?php
+declare(strict_types=1);
 
 namespace WebLoader\Test\Filter;
 
+use PHPUnit\Framework\TestCase;
 use WebLoader\Filter\CssUrlsFilter;
 
-class CssUrlsFilterTest extends \PHPUnit_Framework_TestCase
+class CssUrlsFilterTest extends TestCase
 {
 
 	/** @var CssUrlsFilter */
 	private $object;
 
-	protected function setUp()
+
+	protected function setUp(): void
 	{
 		$this->object = new CssUrlsFilter(__DIR__ . '/..', '/');
 	}
 
-	public function testCannonicalizePath()
+
+	public function testCannonicalizePath(): void
 	{
 		$path = $this->object->cannonicalizePath('/prase/./dobytek/../ale/nic.jpg');
 		$this->assertEquals('/prase/ale/nic.jpg', $path);
 	}
 
-	public function testAbsolutizeAbsolutized()
+
+	public function testAbsolutizeAbsolutized(): void
 	{
 		$cssPath = __DIR__ . '/../fixtures/style.css';
 
@@ -32,7 +37,8 @@ class CssUrlsFilterTest extends \PHPUnit_Framework_TestCase
 		$this->assertEquals($abs, $this->object->absolutizeUrl($abs, '\'', $cssPath));
 	}
 
-	public function testAbsolutize()
+
+	public function testAbsolutize(): void
 	{
 		$cssPath = __DIR__ . '/../fixtures/style.css';
 
@@ -47,11 +53,11 @@ class CssUrlsFilterTest extends \PHPUnit_Framework_TestCase
 		);
 	}
 
-	public function testAbsolutizeOutsideOfDocRoot()
+
+	public function testAbsolutizeOutsideOfDocRoot(): void
 	{
 		$path = './../images/image.png';
 		$existingPath = __DIR__ . '/../../Compiler.php';
 		$this->assertEquals($path, $this->object->absolutizeUrl($path, '\'', $existingPath));
 	}
-
 }

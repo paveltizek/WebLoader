@@ -1,34 +1,38 @@
 <?php
+declare(strict_types=1);
 
 namespace WebLoader\Test;
 
 use Mockery;
+use PHPUnit\Framework\TestCase;
 use WebLoader\Compiler;
+use WebLoader\File;
 
 /**
  * CompilerTest
  *
  * @author Jan Marek
  */
-class CompilerTest extends \PHPUnit_Framework_TestCase
+class CompilerTest extends TestCase
 {
 
 	/** @var \WebLoader\Compiler */
 	private $object;
 
-	protected function setUp()
+
+	protected function setUp(): void
 	{
 		$fileCollection = Mockery::mock('WebLoader\IFileCollection');
-		$fileCollection->shouldReceive('getFiles')->andReturn(array(
+		$fileCollection->shouldReceive('getFiles')->andReturn([
 			__DIR__ . '/fixtures/a.txt',
 			__DIR__ . '/fixtures/b.txt',
 			__DIR__ . '/fixtures/c.txt',
-		));
-		$fileCollection->shouldReceive('getWatchFiles')->andReturn(array(
+		]);
+		$fileCollection->shouldReceive('getWatchFiles')->andReturn([
 			__DIR__ . '/fixtures/a.txt',
 			__DIR__ . '/fixtures/b.txt',
 			__DIR__ . '/fixtures/c.txt',
-		));
+		]);
 
 		$convention = Mockery::mock('WebLoader\IOutputNamingConvention');
 		$convention->shouldReceive('getFilename')->andReturnUsing(function ($files, $compiler) {
@@ -42,15 +46,14 @@ class CompilerTest extends \PHPUnit_Framework_TestCase
 		}
 	}
 
-	/**
-	 * @return array
-	 */
-	private function getTempFiles()
+
+	private function getTempFiles(): array
 	{
 		return glob(__DIR__ . '/temp/webloader-*');
 	}
 
-	public function testJoinFiles()
+
+	public function testJoinFiles(): void
 	{
 		$this->assertTrue($this->object->getJoinFiles());
 
@@ -59,7 +62,8 @@ class CompilerTest extends \PHPUnit_Framework_TestCase
 		$this->assertEquals(1, count($this->getTempFiles()), 'Multiple files are generated instead of join.');
 	}
 
-	public function testEmptyFiles()
+
+	public function testEmptyFiles(): void
 	{
 		$this->assertTrue($this->object->getJoinFiles());
 		$this->object->setFileCollection(new \WebLoader\FileCollection());
@@ -69,9 +73,10 @@ class CompilerTest extends \PHPUnit_Framework_TestCase
 		$this->assertEquals(0, count($this->getTempFiles()));
 	}
 
-	public function testNotJoinFiles()
+
+	public function testNotJoinFiles(): void
 	{
-		$this->object->setJoinFiles(FALSE);
+		$this->object->setJoinFiles(false);
 		$this->assertFalse($this->object->getJoinFiles());
 
 		$ret = $this->object->generate();
@@ -79,15 +84,17 @@ class CompilerTest extends \PHPUnit_Framework_TestCase
 		$this->assertEquals(3, count($this->getTempFiles()), 'Wrong file count generated.');
 	}
 
+
 	/**
 	 * @expectedException \WebLoader\FileNotFoundException
 	 */
-	public function testSetOutDir()
+	public function testSetOutDir(): void
 	{
 		$this->object->setOutputDir('blablabla');
 	}
 
-	public function testGeneratingAndFilters()
+
+	public function testGeneratingAndFilters(): void
 	{
 		$this->object->addFileFilter(function ($code) {
 			return strrev($code);
@@ -105,57 +112,67 @@ class CompilerTest extends \PHPUnit_Framework_TestCase
 		$expectedContent = '-' . PHP_EOL . 'a:cba,' . PHP_EOL . 'b:fed,' . PHP_EOL .
 			'c:ihg,-' . PHP_EOL . 'a:cba,' . PHP_EOL . 'b:fed,' . PHP_EOL . 'c:ihg,';
 
+		/**
+		 * @var $files File[]
+		 */
 		$files = $this->object->generate();
 
-		$this->assertTrue(is_numeric($files[0]->lastModified) && $files[0]->lastModified > 0, 'Generate does not provide last modified timestamp correctly.');
+		$this->assertTrue(is_numeric($files[0]->getLastModified()) && $files[0]->getLastModified() > 0, 'Generate does not provide last modified timestamp correctly.');
 
-		$content = file_get_contents($this->object->getOutputDir() . '/' . $files[0]->file);
+		$content = file_get_contents($this->object->getOutputDir() . '/' . $files[0]->getFile());
 
 		$this->assertEquals($expectedContent, $content);
 	}
 
-	public function testGenerateReturnsSourceFilePaths()
+
+	public function testGenerateReturnsSourceFilePaths(): void
 	{
+		/**
+		 * @var $res File[]
+		 */
 		$res = $this->object->generate();
-		$this->assertInternalType('array', $res[0]->sourceFiles);
-		$this->assertCount(3, $res[0]->sourceFiles);
-		$this->assertFileExists($res[0]->sourceFiles[0]);
+		$this->assertInternalType('array', $res[0]->getSourceFiles());
+		$this->assertCount(3, $res[0]->getSourceFiles());
+		$this->assertFileExists($res[0]->getSourceFiles()[0]);
 	}
 
-	public function testFilters()
+
+	public function testFilters(): void
 	{
 		$filter = function ($code, \WebLoader\Compiler $loader) {
 			return $code . $code;
 		};
 		$this->object->addFilter($filter);
 		$this->object->addFilter($filter);
-		$this->assertEquals(array($filter, $filter), $this->object->getFilters());
+		$this->assertEquals([$filter, $filter], $this->object->getFilters());
 	}
 
-	public function testFileFilters()
+
+	public function testFileFilters(): void
 	{
 		$filter = function ($code, \WebLoader\Compiler $loader, $file = null) {
 			return $code . $code;
 		};
 		$this->object->addFileFilter($filter);
 		$this->object->addFileFilter($filter);
-		$this->assertEquals(array($filter, $filter), $this->object->getFileFilters());
+		$this->assertEquals([$filter, $filter], $this->object->getFileFilters());
 	}
 
+
 	/**
-	 * @expectedException \WebLoader\InvalidArgumentException
+	 * @expectedException \TypeError
 	 */
-	public function testNonCallableFilter()
+	public function testNonCallableFilter(): void
 	{
 		$this->object->addFilter(4);
 	}
 
+
 	/**
-	 * @expectedException \WebLoader\InvalidArgumentException
+	 * @expectedException \TypeError
 	 */
-	public function testNonCallableFileFilter()
+	public function testNonCallableFileFilter(): void
 	{
 		$this->object->addFileFilter(4);
 	}
-
 }

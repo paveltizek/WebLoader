@@ -1,8 +1,12 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace WebLoader\Nette;
 
+use Nette\Utils\Html;
 use WebLoader\Compiler;
+use WebLoader\File;
 use WebLoader\FileCollection;
 
 /**
@@ -23,57 +27,49 @@ abstract class WebLoader extends \Nette\Application\UI\Control
 	/** @var bool */
 	private $appendLastModified;
 
-	public function __construct(Compiler $compiler, $tempPath, $appendLastModified)
+
+	public function __construct(Compiler $compiler, string $tempPath, bool $appendLastModified)
 	{
-		parent::__construct();
 		$this->compiler = $compiler;
 		$this->tempPath = $tempPath;
 		$this->appendLastModified = $appendLastModified;
 	}
 
-	/**
-	 * @return \WebLoader\Compiler
-	 */
-	public function getCompiler()
+
+	public function getCompiler(): Compiler
 	{
 		return $this->compiler;
 	}
 
-	/**
-	 * @param \WebLoader\Compiler
-	 */
-	public function setCompiler(Compiler $compiler)
+
+	public function setCompiler(Compiler $compiler): void
 	{
 		$this->compiler = $compiler;
 	}
 
-	/**
-	 * @return string
-	 */
-	public function getTempPath()
+
+	public function getTempPath(): string
 	{
 		return $this->tempPath;
 	}
 
-	/**
-	 * @param string
-	 */
-	public function setTempPath($tempPath)
+
+	public function setTempPath(string $tempPath): void
 	{
 		$this->tempPath = $tempPath;
 	}
 
+
 	/**
 	 * Get html element including generated content
-	 * @param string $source
-	 * @return \Nette\Utils\Html
 	 */
-	abstract public function getElement($source);
+	abstract public function getElement(string $source): Html;
+
 
 	/**
 	 * Generate compiled file(s) and render link(s)
 	 */
-	public function render()
+	public function render(): void
 	{
 		$hasArgs = func_num_args() > 0;
 
@@ -98,15 +94,15 @@ abstract class WebLoader extends \Nette\Application\UI\Control
 		}
 	}
 
-	protected function getGeneratedFilePath($file)
+
+	protected function getGeneratedFilePath(File $file)
 	{
-		$path = $this->tempPath . '/' . $file->file;
+		$path = $this->tempPath . '/' . $file->getFile();
 
 		if ($this->appendLastModified) {
-			$path .= '?' . $file->lastModified;
+			$path .= '?' . $file->getLastModified();
 		}
 
 		return $path;
 	}
-
 }

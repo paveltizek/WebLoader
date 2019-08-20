@@ -1,6 +1,11 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace WebLoader\Filter;
+
+use lessc;
+use WebLoader\Compiler;
 
 /**
  * Less CSS filter
@@ -10,35 +15,30 @@ namespace WebLoader\Filter;
  */
 class LessFilter
 {
-
 	private $lc;
 
-	public function __construct(\lessc $lc = NULL)
+
+	public function __construct(?lessc $lc = null)
 	{
 		$this->lc = $lc;
 	}
 
-	/**
-	 * @return \lessc
-	 */
-	private function getLessC()
+
+	private function getLessC(): lessc
 	{
 		// lazy loading
 		if (empty($this->lc)) {
-			$this->lc = new \lessc();
+			$this->lc = new lessc();
 		}
 
 		return clone $this->lc;
 	}
 
+
 	/**
 	 * Invoke filter
-	 * @param string $code
-	 * @param \WebLoader\Compiler $loader
-	 * @param string $file
-	 * @return string
 	 */
-	public function __invoke($code, \WebLoader\Compiler $loader, $file)
+	public function __invoke(string $code, Compiler $loader, string $file): string
 	{
 		if (pathinfo($file, PATHINFO_EXTENSION) === 'less') {
 			$lessc = $this->getLessC();
@@ -48,5 +48,4 @@ class LessFilter
 
 		return $code;
 	}
-
 }

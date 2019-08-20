@@ -1,6 +1,11 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace WebLoader\Filter;
+
+use WebLoader\Compiler;
+use WebLoader\Path;
 
 /**
  * Absolutize urls in CSS
@@ -14,21 +19,21 @@ class CssUrlsFilter
 	/**
 	 * @var string
 	 */
-	private $docRoot;
+	protected $basePath;
 
 	/**
 	 * @var string
 	 */
-	protected $basePath;
+	private $docRoot;
+
 
 	/**
 	 * @param string $docRoot web document root
-	 * @param string $basePath base path
 	 * @throws \WebLoader\InvalidArgumentException
 	 */
-	public function __construct($docRoot, $basePath = '/')
+	public function __construct(string $docRoot, string $basePath = '/')
 	{
-		$this->docRoot = \WebLoader\Path::normalize($docRoot);
+		$this->docRoot = Path::normalize($docRoot);
 
 		if (!is_dir($this->docRoot)) {
 			throw new \WebLoader\InvalidArgumentException('Given document root is not directory.');
@@ -37,29 +42,28 @@ class CssUrlsFilter
 		$this->basePath = $basePath;
 	}
 
-	/**
-	 * @param string $basePath
-	 */
-	public function setBasePath($basePath)
+
+	public function setBasePath(string $basePath): void
 	{
 		$this->basePath = $basePath;
 	}
 
+
 	/**
 	 * Make relative url absolute
+	 *
 	 * @param string $url image url
 	 * @param string $quote single or double quote
 	 * @param string $cssFile absolute css file path
-	 * @return string
 	 */
-	public function absolutizeUrl($url, $quote, $cssFile)
+	public function absolutizeUrl(string $url, string $quote, string $cssFile): string
 	{
 		// is already absolute
 		if (preg_match('/^([a-z]+:\/)?\//', $url)) {
 			return $url;
 		}
 
-		$cssFile = \WebLoader\Path::normalize($cssFile);
+		$cssFile = Path::normalize($cssFile);
 
 		// inside document root
 		if (strncmp($cssFile, $this->docRoot, strlen($this->docRoot)) === 0) {
@@ -74,18 +78,21 @@ class CssUrlsFilter
 		return $quote === '"' ? addslashes($path) : $path;
 	}
 
+
 	/**
 	 * Cannonicalize path
-	 * @param string $path
+	 *
 	 * @return string path
 	 */
-	public function cannonicalizePath($path)
+	public function cannonicalizePath(string $path): string
 	{
 		$path = strtr($path, DIRECTORY_SEPARATOR, '/');
 
-		$pathArr = array();
+		$pathArr = [];
 		foreach (explode('/', $path) as $i => $name) {
-			if ($name === '.' || ($name === '' && $i > 0)) continue;
+			if ($name === '.' || ($name === '' && $i > 0)) {
+				continue;
+			}
 
 			if ($name === '..') {
 				array_pop($pathArr);
@@ -98,14 +105,11 @@ class CssUrlsFilter
 		return implode('/', $pathArr);
 	}
 
+
 	/**
 	 * Invoke filter
-	 * @param string $code
-	 * @param \WebLoader\Compiler $loader
-	 * @param string $file
-	 * @return string
 	 */
-	public function __invoke($code, \WebLoader\Compiler $loader, $file = null)
+	public function __invoke(string $code, Compiler $loader, ?string $file = null): string
 	{
 		// thanks to kravco
 		$regexp = '~
@@ -128,10 +132,8 @@ class CssUrlsFilter
 
 		$self = $this;
 
-		return preg_replace_callback($regexp, function ($matches) use ($self, $file)
-		{
+		return preg_replace_callback($regexp, function ($matches) use ($self, $file) {
 			return "url('" . $self->absolutizeUrl($matches[2], $matches[1], $file) . "')";
 		}, $code);
 	}
-
 }

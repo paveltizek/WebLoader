@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace WebLoader;
 
 /**
@@ -14,207 +16,181 @@ class Compiler
 	private $outputDir;
 
 	/** @var bool */
-	private $joinFiles = TRUE;
+	private $joinFiles = true;
 
 	/** @var array */
-	private $filters = array();
+	private $filters = [];
 
 	/** @var array */
-	private $fileFilters = array();
+	private $fileFilters = [];
 
-	/** @var IFileCollection */
+	/** @var \WebLoader\IFileCollection */
 	private $collection;
 
-	/** @var IOutputNamingConvention */
+	/** @var \WebLoader\IOutputNamingConvention */
 	private $namingConvention;
 
 	/** @var bool */
-	private $checkLastModified = TRUE;
+	private $checkLastModified = true;
 
 	/** @var bool */
-	private $debugging = FALSE;
+	private $debugging = false;
 
 	/** @var bool */
-	private $async = FALSE;
+	private $async = false;
 
 	/** @var bool */
-	private $defer = FALSE;
+	private $defer = false;
 
 	/** @var string */
-	private $nonce = NULL;
+	private $nonce;
 
 	/** @var bool */
-	private $absoluteUrl = FALSE;
+	private $absoluteUrl = false;
 
-	public function __construct(IFileCollection $files, IOutputNamingConvention $convention, $outputDir)
+
+	public function __construct(IFileCollection $files, IOutputNamingConvention $convention, string $outputDir)
 	{
 		$this->collection = $files;
 		$this->namingConvention = $convention;
 		$this->setOutputDir($outputDir);
 	}
 
+
 	/**
 	 * Create compiler with predefined css output naming convention
-	 * @param IFileCollection $files
-	 * @param string $outputDir
-	 * @return Compiler
 	 */
-	public static function createCssCompiler(IFileCollection $files, $outputDir)
+	public static function createCssCompiler(IFileCollection $files, string $outputDir): self
 	{
 		return new static($files, DefaultOutputNamingConvention::createCssConvention(), $outputDir);
 	}
 
+
 	/**
 	 * Create compiler with predefined javascript output naming convention
-	 * @param IFileCollection $files
-	 * @param string $outputDir
-	 * @return Compiler
 	 */
-	public static function createJsCompiler(IFileCollection $files, $outputDir)
+	public static function createJsCompiler(IFileCollection $files, string $outputDir): self
 	{
 		return new static($files, DefaultOutputNamingConvention::createJsConvention(), $outputDir);
 	}
 
-	/**
-	 * @param bool $allow
-	 */
-	public function enableDebugging($allow = TRUE)
+
+	public function enableDebugging(bool $allow = true): void
 	{
 		$this->debugging = (bool) $allow;
 	}
 
-	/**
-	 * @return string
-	 */
-	public function getNonce()
+
+	public function getNonce(): ?string
 	{
 		return $this->nonce;
 	}
 
-	/**
-	 * @param string $nonce
-	 */
-	public function setNonce($nonce)
+
+	public function setNonce(?string $nonce): void
 	{
-        	$this->nonce = $nonce;
+		$this->nonce = $nonce;
 	}
+
 
 	/**
 	 * Get temp path
-	 * @return string
 	 */
-	public function getOutputDir()
+	public function getOutputDir(): string
 	{
 		return $this->outputDir;
 	}
 
+
 	/**
 	 * Set temp path
-	 * @param string $tempPath
 	 */
-	public function setOutputDir($tempPath)
+	public function setOutputDir(string $tempPath): void
 	{
 		$tempPath = Path::normalize($tempPath);
 
 		if (!is_dir($tempPath)) {
-			throw new FileNotFoundException("Temp path '$tempPath' does not exist.");
+			throw new \WebLoader\FileNotFoundException("Temp path '$tempPath' does not exist.");
 		}
 
 		if (!is_writable($tempPath)) {
-			throw new InvalidArgumentException("Directory '$tempPath' is not writeable.");
+			throw new \WebLoader\InvalidArgumentException("Directory '$tempPath' is not writeable.");
 		}
 
 		$this->outputDir = $tempPath;
 	}
 
+
 	/**
 	 * Get join files
-	 * @return bool
 	 */
-	public function getJoinFiles()
+	public function getJoinFiles(): bool
 	{
 		return $this->joinFiles;
 	}
 
-	/**
-	 * Set join files
-	 * @param bool $joinFiles
-	 */
-	public function setJoinFiles($joinFiles)
-	{
-		$this->joinFiles = (bool) $joinFiles;
-	}
 
 	/**
-	 * @return boolean
+	 * Set join files
 	 */
-	public function isAsync()
+	public function setJoinFiles(bool $joinFiles): void
+	{
+		$this->joinFiles = $joinFiles;
+	}
+
+
+	public function isAsync(): bool
 	{
 		return $this->async;
 	}
 
-	/**
-	 * @param boolean $async
-	 * @return Compiler
-	 */
-	public function setAsync($async)
+
+	public function setAsync(bool $async): self
 	{
-		$this->async = (bool) $async;
+		$this->async = $async;
 		return $this;
 	}
 
-	/**
-	 * @return boolean
-	 */
-	public function isDefer()
+
+	public function isDefer(): bool
 	{
 		return $this->defer;
 	}
 
-	/**
-	 * @param boolean $defer
-	 * @return Compiler
-	 */
-	public function setDefer($defer)
+
+	public function setDefer(bool $defer): self
 	{
 		$this->defer = $defer;
 		return $this;
 	}
 
 
-	/**
-	 * @return boolean
-	 */
-	public function isAbsoluteUrl()
+	public function isAbsoluteUrl(): bool
 	{
 		return $this->absoluteUrl;
 	}
 
-	/**
-	 * @param boolean $absoluteUrl
-	 * @return Compiler
-	 */
-	public function setAbsoluteUrl($absoluteUrl)
+
+	public function setAbsoluteUrl(bool $absoluteUrl): self
 	{
 		$this->absoluteUrl = $absoluteUrl;
 		return $this;
 	}
 
+
 	/**
 	 * Set check last modified
-	 * @param bool $checkLastModified
 	 */
-	public function setCheckLastModified($checkLastModified)
+	public function setCheckLastModified(bool $checkLastModified): void
 	{
-		$this->checkLastModified = (bool) $checkLastModified;
+		$this->checkLastModified = $checkLastModified;
 	}
+
 
 	/**
 	 * Get last modified timestamp of newest file
-	 * @param array $files
-	 * @return int
 	 */
-	public function getLastModified(array $files = null)
+	public function getLastModified(?array $files = null): int
 	{
 		if ($files === null) {
 			$files = $this->collection->getFiles();
@@ -229,86 +205,82 @@ class Compiler
 		return $modified;
 	}
 
+
 	/**
 	 * Get joined content of all files
-	 * @param array $files
-	 * @return string
 	 */
-	public function getContent(array $files = null)
+	public function getContent(?array $files = null): string
 	{
-		if ($files === null) {
-			$files = $this->collection->getFiles();
-		}
+        if ($files === null) {
+            $files = $this->getFileCollection()->getFiles();
+        }
 
-		// load content
-		$content = '';
-		foreach ($files as $file) {
-			$content .= PHP_EOL . $this->loadFile($file);
-		}
+        $content = '';
+        foreach ($files as $file) {
+            // apply filters
+            $temp = $this->loadFile($file);
+            foreach ($this->getFilters() as $filter) {
+                $temp = \call_user_func($filter, $temp, $this, $file);
+            }
+            $content .= $temp . PHP_EOL;
+        }
 
-		// apply filters
-		foreach ($this->filters as $filter) {
-			$content = call_user_func($filter, $content, $this);
-		}
-
-		return $content;
+        return $content;
 	}
+
 
 	/**
 	 * Load content and save file
-	 * @return array filenames of generated files
 	 */
-	public function generate()
+	public function generate(): array
 	{
 		$files = $this->collection->getFiles();
 
 		if (!count($files)) {
-			return array();
+			return [];
 		}
 
 		if ($this->joinFiles) {
-			$watchFiles = $this->checkLastModified ? array_unique(array_merge($files, $this->collection->getWatchFiles())) : array();
+			$watchFiles = $this->checkLastModified ? array_unique(array_merge($files, $this->collection->getWatchFiles())) : [];
 
-			return array(
+			return [
 				$this->generateFiles($files, $watchFiles),
-			);
+			];
 
 		} else {
-			$arr = array();
+			$arr = [];
 
 			foreach ($files as $file) {
-				$watchFiles = $this->checkLastModified ? array_unique(array_merge(array($file), $this->collection->getWatchFiles())) : array();
-				$arr[] = $this->generateFiles(array($file), $watchFiles);
+				$watchFiles = $this->checkLastModified ? array_unique(array_merge([$file], $this->collection->getWatchFiles())) : [];
+				$arr[] = $this->generateFiles([$file], $watchFiles);
 			}
 
 			return $arr;
 		}
 	}
 
-	protected function generateFiles(array $files, array $watchFiles = array())
+
+	protected function generateFiles(array $files, array $watchFiles = [])
 	{
 		$name = $this->namingConvention->getFilename($files, $this);
 		$path = $this->outputDir . '/' . $name;
 		$lastModified = $this->checkLastModified ? $this->getLastModified($watchFiles) : 0;
 
-		if (!file_exists($path) || $lastModified > filemtime($path) || $this->debugging === TRUE) {
-			$outPath = in_array('nette.safe', stream_get_wrappers()) ? 'nette.safe://' . $path : $path;
+		if (!file_exists($path) || $lastModified > filemtime($path) || $this->debugging === true) {
+			$outPath = in_array('nette.safe', stream_get_wrappers(), true) ? 'nette.safe://' . $path : $path;
 			file_put_contents($outPath, $this->getContent($files));
 		}
 
-		return (object) array(
-			'file' => $name,
-			'lastModified' => filemtime($path),
-			'sourceFiles' => $files,
-		);
+		return new File($name, filemtime($path), $files);
 	}
+
 
 	/**
 	 * Load file
+	 *
 	 * @param string $file path
-	 * @return string
 	 */
-	protected function loadFile($file)
+	protected function loadFile(string $file): string
 	{
 		if (file_exists($file)) {
 		    $content = file_get_contents($file);
@@ -319,78 +291,51 @@ class Compiler
         }
 	}
 
-	/**
-	 * @return \WebLoader\IFileCollection
-	 */
-	public function getFileCollection()
+
+	public function getFileCollection(): IFileCollection
 	{
 		return $this->collection;
 	}
 
-	/**
-	 * @return \WebLoader\IOutputNamingConvention
-	 */
-	public function getOutputNamingConvention()
+
+	public function getOutputNamingConvention(): IOutputNamingConvention
 	{
 		return $this->namingConvention;
 	}
 
-	/**
-	 * @param \WebLoader\IFileCollection $collection
-	 */
-	public function setFileCollection(IFileCollection $collection)
+
+	public function setFileCollection(IFileCollection $collection): void
 	{
 		$this->collection = $collection;
 	}
 
-	/**
-	 * @param \WebLoader\IOutputNamingConvention $namingConvention
-	 */
-	public function setOutputNamingConvention(IOutputNamingConvention $namingConvention)
+
+	public function setOutputNamingConvention(IOutputNamingConvention $namingConvention): void
 	{
 		$this->namingConvention = $namingConvention;
 	}
 
-	/**
-	 * @param callback $filter
-	 * @throws InvalidArgumentException
-	 */
-	public function addFilter($filter)
-	{
-		if (!is_callable($filter)) {
-			throw new InvalidArgumentException('Filter is not callable.');
-		}
 
+	public function addFilter(callable $filter): void
+	{
 		$this->filters[] = $filter;
 	}
 
-	/**
-	 * @return array
-	 */
-	public function getFilters()
+
+	public function getFilters(): array
 	{
 		return $this->filters;
 	}
 
-	/**
-	 * @param callback $filter
-	 * @throws InvalidArgumentException
-	 */
-	public function addFileFilter($filter)
-	{
-		if (!is_callable($filter)) {
-			throw new InvalidArgumentException('Filter is not callable.');
-		}
 
+	public function addFileFilter(callable $filter): void
+	{
 		$this->fileFilters[] = $filter;
 	}
 
-	/**
-	 * @return array
-	 */
-	public function getFileFilters()
+
+	public function getFileFilters(): array
 	{
 		return $this->fileFilters;
 	}
-
 }

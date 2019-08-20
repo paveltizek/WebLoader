@@ -1,18 +1,19 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace WebLoader\Nette;
 
 use Nette\DI\Container;
 use Nette\Http\IRequest;
-use WebLoader\Compiler;
 
 class LoaderFactory
 {
 
-	/** @var IRequest */
+	/** @var \Nette\Http\IRequest */
 	private $httpRequest;
 
-	/** @var Container */
+	/** @var \Nette\DI\Container */
 	private $serviceLocator;
 
 	/** @var array */
@@ -21,13 +22,8 @@ class LoaderFactory
 	/** @var string */
 	private $extensionName;
 
-	/**
-	 * @param array $tempPaths
-	 * @param string $extensionName
-	 * @param IRequest $httpRequest
-	 * @param Container $serviceLocator
-	 */
-	public function __construct(array $tempPaths, $extensionName, IRequest $httpRequest, Container $serviceLocator)
+
+	public function __construct(array $tempPaths, string $extensionName, IRequest $httpRequest, Container $serviceLocator)
 	{
 		$this->httpRequest = $httpRequest;
 		$this->serviceLocator = $serviceLocator;
@@ -35,40 +31,31 @@ class LoaderFactory
 		$this->extensionName = $extensionName;
 	}
 
-	/**
-	 * @param string $name
-	 * @param bool $appendLastModified
-	 * @return \WebLoader\Nette\CssLoader
-	 */
-	public function createCssLoader($name, $appendLastModified = FALSE)
+
+	public function createCssLoader(string $name, bool $appendLastModified = false): CssLoader
 	{
-		/** @var Compiler $compiler */
+		/** @var \WebLoader\Compiler $compiler */
 		$compiler = $this->serviceLocator->getService($this->extensionName . '.css' . ucfirst($name) . 'Compiler');
 		return new CssLoader($compiler, $this->formatTempPath($name, $compiler->isAbsoluteUrl()), $appendLastModified);
 	}
 
-	/**
-	 * @param string $name
-	 * @param bool $appendLastModified
-	 * @return \WebLoader\Nette\JavaScriptLoader
-	 */
-	public function createJavaScriptLoader($name, $appendLastModified = FALSE)
+
+	public function createJavaScriptLoader(string $name, bool $appendLastModified = false, ?string $nonce = null): JavaScriptLoader
 	{
-		/** @var Compiler $compiler */
+		/** @var \WebLoader\Compiler $compiler */
 		$compiler = $this->serviceLocator->getService($this->extensionName . '.js' . ucfirst($name) . 'Compiler');
+		if ($nonce) {
+			$compiler->setNonce($nonce);
+		}
 		return new JavaScriptLoader($compiler, $this->formatTempPath($name, $compiler->isAbsoluteUrl()), $appendLastModified);
 	}
 
-	/**
-	 * @param string $name
-	 * @return string
-	 */
-	private function formatTempPath($name, $absoluteUrl = FALSE)
+
+	private function formatTempPath(string $name, $absoluteUrl = false): string
 	{
 		$lName = strtolower($name);
 		$tempPath = isset($this->tempPaths[$lName]) ? $this->tempPaths[$lName] : Extension::DEFAULT_TEMP_PATH;
 		$method = $absoluteUrl ? 'getBaseUrl' : 'getBasePath';
 		return rtrim($this->httpRequest->getUrl()->{$method}(), '/') . '/' . $tempPath;
 	}
-
 }

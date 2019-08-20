@@ -1,7 +1,9 @@
 <?php
+declare(strict_types=1);
 
 namespace WebLoader\Test;
 
+use PHPUnit\Framework\TestCase;
 use WebLoader\DefaultOutputNamingConvention;
 
 /**
@@ -9,7 +11,7 @@ use WebLoader\DefaultOutputNamingConvention;
  *
  * @author Jan Marek
  */
-class DefaultOutputNamingConventionTest extends \PHPUnit_Framework_TestCase
+class DefaultOutputNamingConventionTest extends TestCase
 {
 
 	/** @var DefaultOutputNamingConvention */
@@ -17,18 +19,20 @@ class DefaultOutputNamingConventionTest extends \PHPUnit_Framework_TestCase
 
 	private $compiler;
 
-	protected function setUp()
+
+	protected function setUp(): void
 	{
 		$this->object = new DefaultOutputNamingConvention();
 		$this->compiler = \Mockery::mock('Webloader\Compiler');
 	}
 
-	public function testMultipleFiles()
+
+	public function testMultipleFiles(): void
 	{
-		$files = array(
+		$files = [
 			__DIR__ . DIRECTORY_SEPARATOR . 'fixtures' . DIRECTORY_SEPARATOR . 'a.txt',
 			__DIR__ . DIRECTORY_SEPARATOR . 'fixtures' . DIRECTORY_SEPARATOR . 'b.txt',
-		);
+		];
 
 		$name = $this->object->getFilename($files, $this->compiler);
 		$this->assertRegExp('/^[0-9a-f]{12}$/', $name);
@@ -39,34 +43,36 @@ class DefaultOutputNamingConventionTest extends \PHPUnit_Framework_TestCase
 		$this->assertNotEquals($name, $name2, 'Different file lists results to same filename.');
 	}
 
-	public function testOneFile()
+
+	public function testOneFile(): void
 	{
-		$files = array(
+		$files = [
 			__DIR__ . DIRECTORY_SEPARATOR . 'fixtures' . DIRECTORY_SEPARATOR . 'a.txt',
-		);
+		];
 
 		$name = $this->object->getFilename($files, $this->compiler);
 		$this->assertRegExp('/^[0-9a-f]{12}$/', $name);
 	}
 
-	public function testCssConvention()
+
+	public function testCssConvention(): void
 	{
-		$files = array(
+		$files = [
 			__DIR__ . DIRECTORY_SEPARATOR . 'fixtures' . DIRECTORY_SEPARATOR . 'a.txt',
-		);
+		];
 
 		$name = DefaultOutputNamingConvention::createCssConvention()->getFilename($files, $this->compiler);
 		$this->assertRegExp('/^[0-9a-f]{12}.css$/', $name);
 	}
 
-	public function testJsConvention()
+
+	public function testJsConvention(): void
 	{
-		$files = array(
+		$files = [
 			__DIR__ . DIRECTORY_SEPARATOR . 'fixtures' . DIRECTORY_SEPARATOR . 'a.txt',
-		);
+		];
 
 		$name = DefaultOutputNamingConvention::createJsConvention()->getFilename($files, $this->compiler);
 		$this->assertRegExp('/^[0-9a-f]{12}.js$/', $name);
 	}
-
 }

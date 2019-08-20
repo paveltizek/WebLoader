@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace WebLoader;
 
 /**
@@ -9,5 +11,4 @@ namespace WebLoader;
  */
 class WebLoaderException extends \Exception
 {
-
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace WebLoader\Nette;
 
 /**
@@ -7,5 +9,4 @@ namespace WebLoader\Nette;
  */
 class CompilationException extends \WebLoader\WebLoaderException
 {
-
 }

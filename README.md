@@ -1,5 +1,11 @@
-﻿WebLoader [![Build Status](https://secure.travis-ci.org/janmarek/WebLoader.png?branch=master)](http://travis-ci.org/janmarek/WebLoader)
+﻿WebLoader compatible with Nette 3.0
 =======================
+
+Forked version of another forked version compatible  with Nette 3.0. 
+
+Modified only for older projects. Please use webpack.
+
+-----------------
 
 Component for CSS and JS files loading
 
